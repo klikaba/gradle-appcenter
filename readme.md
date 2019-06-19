@@ -12,7 +12,7 @@ File : `build.gradle`
 
 ```groovy
 plugins {
-  id "ba.klika.appcenter" version "1.2"
+  id "ba.klika.appcenter" version "1.3"
 }
 ```
 
@@ -26,7 +26,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.ba.klika:appcenter:1.2"
+    classpath "gradle.plugin.ba.klika:appcenter:1.3"
   }
 }
 
@@ -128,7 +128,7 @@ Simple script to download APK from AppCenter before tests:
 ```groovy
 plugins {
     id 'java'
-    id 'ba.klika.appcenter' version '1.2'
+    id 'ba.klika.appcenter' version '1.3'
 }
 
 group 'ba.klika.appcenter.automation-test'
@@ -163,7 +163,7 @@ Simple script to download APK and IPA build from AppCenter before tests:
 ```groovy
 plugins {
     id 'java'
-    id 'ba.klika.appcenter' version '1.2'
+    id 'ba.klika.appcenter' version '1.3'
 }
 
 group 'ba.klika.appcenter.automation-test'
