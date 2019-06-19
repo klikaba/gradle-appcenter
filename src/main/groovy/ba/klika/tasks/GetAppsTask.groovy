@@ -10,15 +10,28 @@ class GetAppsTask extends AppcenterBaseTask {
         RESTClient client = getRestClient("/apps")
         def callResponse = catchHttpExceptions { client.get(headers()) }
         if (callResponse.status == 200) {
-            project.logger.lifecycle(sprintf('------------------------------------------------------------------------------------'))
-            project.logger.lifecycle(sprintf("%36s|%15s|%15s|%15s", 'id', 'os', 'ownerName', 'appName'))
-            project.logger.lifecycle(sprintf('------------------------------------------------------------------------------------'))
+            project.logger.lifecycle(sprintf('-----------------------------------------------------------------------------------------------------------------------------------------'))
+            project.logger.lifecycle(sprintf("%36s|%15s|%20s|%30s| %s", 'id', 'os', 'ownerName', 'appName', 'groups'))
+            project.logger.lifecycle(sprintf('-----------------------------------------------------------------------------------------------------------------------------------------'))
             callResponse.getData().each {
-                project.logger.lifecycle(sprintf("%36s|%15s|%15s|%15s", it.id, it.os, it.owner.name, it.name))
+                def groups = getDistributionGroups(it.owner.name, it.name)
+                project.logger.lifecycle(sprintf("%36s|%15s|%20s|%30s| %s", it.id, it.os, it.owner.name, it.name, groups))
             }
-            project.logger.lifecycle(sprintf('------------------------------------------------------------------------------------'))
+            project.logger.lifecycle(sprintf('-----------------------------------------------------------------------------------------------------------------------------------------'))
         } else {
-            throw new GradleException("Error calling AppCenter. Status code " + callResponse.status + '\n' + callResponse.getData().toString())
+            throw new GradleException("Error calling AppCenter GET Apps. Status code " + callResponse.status + '\n' + callResponse.getData().toString())
+        }
+    }
+
+    def getDistributionGroups(String ownerName, String appName) {
+        RESTClient client = getRestClient("/apps/${ownerName}/${appName}/distribution_groups")
+        def callResponse = catchHttpExceptions { client.get(headers()) }
+        if (callResponse.status == 200) {
+            return callResponse.getData().inject([]) { result, entry ->
+                result << entry.name
+            }.join(',')
+        } else {
+            throw new GradleException("Error calling AppCenter GET Distribution Groups. Status code " + callResponse.status + '\n' + callResponse.getData().toString())
         }
     }
 }
