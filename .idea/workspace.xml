@@ -2,24 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f2e75500-ba48-4e35-bd17-37e3497ca7d1" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/groovy/main/ba/klika/tasks/GetAppsTask$_appsGet_closure2.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/groovy/main/ba/klika/tasks/GetAppsTask$_appsGet_closure2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/classes/groovy/main/ba/klika/tasks/GetAppsTask.class" beforeDir="false" afterPath="$PROJECT_DIR$/build/classes/groovy/main/ba/klika/tasks/GetAppsTask.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/docs/groovydoc/ba/klika/AppcenterPlugin.html" beforeDir="false" afterPath="$PROJECT_DIR$/build/docs/groovydoc/ba/klika/AppcenterPlugin.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/docs/groovydoc/ba/klika/AppcenterPluginExtension.html" beforeDir="false" afterPath="$PROJECT_DIR$/build/docs/groovydoc/ba/klika/AppcenterPluginExtension.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/docs/groovydoc/ba/klika/tasks/AppcenterBaseTask.html" beforeDir="false" afterPath="$PROJECT_DIR$/build/docs/groovydoc/ba/klika/tasks/AppcenterBaseTask.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/docs/groovydoc/ba/klika/tasks/DownloadTask.html" beforeDir="false" afterPath="$PROJECT_DIR$/build/docs/groovydoc/ba/klika/tasks/DownloadTask.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/docs/groovydoc/ba/klika/tasks/GetAppsTask.html" beforeDir="false" afterPath="$PROJECT_DIR$/build/docs/groovydoc/ba/klika/tasks/GetAppsTask.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/docs/groovydoc/deprecated-list.html" beforeDir="false" afterPath="$PROJECT_DIR$/build/docs/groovydoc/deprecated-list.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/docs/groovydoc/help-doc.html" beforeDir="false" afterPath="$PROJECT_DIR$/build/docs/groovydoc/help-doc.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/docs/groovydoc/index-all.html" beforeDir="false" afterPath="$PROJECT_DIR$/build/docs/groovydoc/index-all.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/libs/appcenter-1.0-groovydoc.jar" beforeDir="false" afterPath="$PROJECT_DIR$/build/libs/appcenter-1.0-groovydoc.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/libs/appcenter-1.0-javadoc.jar" beforeDir="false" afterPath="$PROJECT_DIR$/build/libs/appcenter-1.0-javadoc.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/libs/appcenter-1.0-sources.jar" beforeDir="false" afterPath="$PROJECT_DIR$/build/libs/appcenter-1.0-sources.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/libs/appcenter-1.0.jar" beforeDir="false" afterPath="$PROJECT_DIR$/build/libs/appcenter-1.0.jar" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/tmp/groovydoc/ba/klika/tasks/GetAppsTask.groovy" beforeDir="false" afterPath="$PROJECT_DIR$/build/tmp/groovydoc/ba/klika/tasks/GetAppsTask.groovy" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/groovy/ba/klika/tasks/GetAppsTask.groovy" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/groovy/ba/klika/tasks/GetAppsTask.groovy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <ignored path="$PROJECT_DIR$/.gradle/" />
@@ -102,16 +86,16 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/readme.md">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="323">
-              <caret line="200" column="25" selection-start-line="200" selection-start-column="25" selection-end-line="200" selection-end-column="25" />
+            <state relative-caret-position="316">
+              <caret line="54" column="30" lean-forward="true" selection-start-line="54" selection-start-column="30" selection-end-line="54" selection-end-column="30" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/build.gradle">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="105">
@@ -158,8 +142,8 @@
         <option value="$PROJECT_DIR$/src/main/groovy/ba/klika/AppcenterPlugin.groovy" />
         <option value="$PROJECT_DIR$/src/main/groovy/ba/klika/tasks/DownloadTask.groovy" />
         <option value="$PROJECT_DIR$/src/main/groovy/ba/klika/tasks/GetAppsTask.groovy" />
-        <option value="$PROJECT_DIR$/build.gradle" />
         <option value="$PROJECT_DIR$/readme.md" />
+        <option value="$PROJECT_DIR$/build.gradle" />
       </list>
     </option>
   </component>
@@ -272,25 +256,6 @@
       <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
       <method v="2" />
     </configuration>
-    <configuration name="appcenter-plugin [buildDependents]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="buildDependents" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
-      <method v="2" />
-    </configuration>
     <configuration name="appcenter-plugin [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true" show_console_on_std_err="true" show_console_on_std_out="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -306,6 +271,25 @@
           </list>
         </option>
         <option name="vmOptions" value="" />
+      </ExternalSystemSettings>
+      <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
+      <method v="2" />
+    </configuration>
+    <configuration name="appcenter-plugin [clean]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="clean" />
+          </list>
+        </option>
+        <option name="vmOptions" />
       </ExternalSystemSettings>
       <GradleScriptDebugEnabled>true</GradleScriptDebugEnabled>
       <method v="2" />
@@ -350,18 +334,18 @@
     </configuration>
     <list>
       <item itemvalue="Gradle.appcenter-plugin [build]" />
-      <item itemvalue="Gradle.appcenter-plugin [buildDependents]" />
       <item itemvalue="Gradle.appcenter-plugin [publish]" />
       <item itemvalue="Gradle.appcenter-plugin [:build --warning-mode=all]" />
       <item itemvalue="Gradle.appcenter-plugin [publishPlugins]" />
+      <item itemvalue="Gradle.appcenter-plugin [clean]" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.appcenter-plugin [clean]" />
         <item itemvalue="Gradle.appcenter-plugin [publishPlugins]" />
         <item itemvalue="Gradle.appcenter-plugin [build]" />
         <item itemvalue="Gradle.appcenter-plugin [:build --warning-mode=all]" />
         <item itemvalue="Gradle.appcenter-plugin [publish]" />
-        <item itemvalue="Gradle.appcenter-plugin [buildDependents]" />
       </list>
     </recent_temporary>
   </component>
@@ -399,14 +383,14 @@
     <frame x="0" y="23" width="1440" height="826" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.2639485" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2639485" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Designer" order="2" />
       <window_info id="UI Designer" order="3" />
       <window_info id="Favorites" order="4" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.29019073" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.29019073" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -533,13 +517,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/build.gradle">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="7" column="12" selection-start-line="7" selection-start-column="12" selection-end-line="7" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/groovy/ba/klika/tasks/GetAppsTask.groovy">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="179">
@@ -552,8 +529,15 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/readme.md">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="323">
-          <caret line="200" column="25" selection-start-line="200" selection-start-column="25" selection-end-line="200" selection-end-column="25" />
+        <state relative-caret-position="316">
+          <caret line="54" column="30" lean-forward="true" selection-start-line="54" selection-start-column="30" selection-end-line="54" selection-end-column="30" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/build.gradle">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="105">
+          <caret line="7" column="12" selection-start-line="7" selection-start-column="12" selection-end-line="7" selection-end-column="12" />
         </state>
       </provider>
     </entry>

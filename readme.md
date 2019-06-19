@@ -35,10 +35,7 @@ apply plugin: "ba.klika.appcenter"
 
 ## How to use
 
-Firstly generate AppCentar API token: `appcenter.ms` > `Account Settings` > `API Tokens`
-
-Generate API token (it can be read only) and in your build script add:
-
+Generate AppCentar API token: `appcenter.ms` > `Account Settings` > `API Tokens`
 
 File : `build.gradle`
 
@@ -52,8 +49,7 @@ appcenter {
 
 To be able to download app you must know three things: Owner Name, App Name and name of Distribution group. 
 
-There are multiple ways how to get it but easiest is just to run task `:getApps`. It will log all apps 
-available via generated API token with associated Owner Name and App Name and group names.
+There are multiple ways how to get it but easiest is just to run task `:getApps`:
 
 ```bash
 ➜ gradle :getApps             
