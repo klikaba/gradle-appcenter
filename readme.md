@@ -41,7 +41,7 @@ File : `build.gradle`
 
 ```groovy
 appcenter {
-    apiToken = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+    apiToken = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 }
 ```
 
@@ -74,15 +74,15 @@ File : `build.gradle`
 
 ```groovy
 appcenter {
-    apiToken = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+    apiToken = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 }
 
 test.dependsOn {
     download {
-        ownerName = 'Klika'
-        appName = 'TestApp'
-        distributionGroup = 'QA'
-        outPath = './test-app.ipa'
+        ownerName = "Klika"
+        appName = "TestApp"
+        distributionGroup = "QA"
+        outPath = "./test-app.ipa"
     }
 }
 ```
@@ -96,19 +96,19 @@ task you can do something like:
 
 ```groovy
 task downloadIPA(type: ba.klika.tasks.DownloadTask) {
-    apiToken = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-    ownerName = 'Klika'
-    appName = 'TestApp'
-    distributionGroup = 'QA'
-    outPath = './test-app.ipa'
+    apiToken = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    ownerName = "Klika"
+    appName = "TestApp"
+    distributionGroup = "QA"
+    outPath = "./test-app.ipa"
 }
 
 task downloadAPK(type: ba.klika.tasks.DownloadTask) {
-    apiToken = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
-    ownerName = 'Klika'
-    appName = 'TEstApp-1'
-    distributionGroup = 'QA'
-    outPath = './test.apk'
+    apiToken = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    ownerName = "Klika"
+    appName = "TestApp-1"
+    distributionGroup = "QA"
+    outPath = "./test.apk"
 }
 
 test.dependsOn {
@@ -128,7 +128,7 @@ Simple script to download APK from AppCenter before tests:
 ```groovy
 plugins {
     id 'java'
-    id "ba.klika.appcenter" version "1.2"
+    id 'ba.klika.appcenter' version '1.2'
 }
 
 group 'ba.klika.appcenter.automation-test'
@@ -163,7 +163,7 @@ Simple script to download APK and IPA build from AppCenter before tests:
 ```groovy
 plugins {
     id 'java'
-    id "ba.klika.appcenter" version "1.2"
+    id 'ba.klika.appcenter' version '1.2'
 }
 
 group 'ba.klika.appcenter.automation-test'
