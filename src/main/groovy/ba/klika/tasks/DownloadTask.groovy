@@ -27,14 +27,14 @@ class DownloadTask extends AppcenterBaseTask {
      */
     @Input
     @Optional
-    final Property<Integer> buildNumber = project.objects.property(Integer)
+    final Property<String> buildNumber = project.objects.property(String)
 
     /**
      * if releaseId is specified use it directly
      */
     @Input
     @Optional
-    final Property<Integer> releaseId = project.objects.property(Integer)
+    final Property<String> releaseId = project.objects.property(String)
 
     /**
      * short_version like "2.6.0"
@@ -51,13 +51,14 @@ class DownloadTask extends AppcenterBaseTask {
     @TaskAction
     def download() {
         println "download task"
+
         if(releaseId.orNull){
             downloadWithReleaseId(releaseId.get())
         }
         downloadWithoutReleaseId()
     }
 
-    def downloadWithReleaseId(int releaseId){
+    def downloadWithReleaseId(String releaseId){
         println "downloadWithReleaseId"
         String url=getDownloadUrl("/apps/${ownerName.get()}/${appName.get()}/releases/${releaseId}")
         downloadFollowingRedirect(url, outPath.get())
@@ -81,7 +82,7 @@ class DownloadTask extends AppcenterBaseTask {
             println "buildNumber or version specified"
             RESTClient client = getRestClient("/apps/${ownerName.get()}/${appName.get()}/distribution_groups/${distributionGroup.get()}/releases")
             def callResponse = catchHttpExceptions { client.get(headers()) }
-            Integer releaseId = null
+            String releaseId = null
             if (callResponse.status == 200) {
                 def list = callResponse.getData()
                 println list
