@@ -1,6 +1,5 @@
 package ba.klika.tasks
 
-
 import groovyx.net.http.RESTClient
 import org.apache.http.HttpStatus
 import org.gradle.api.GradleException
@@ -32,14 +31,14 @@ class DownloadTask extends AppcenterBaseTask {
      */
     @Input
     @Optional
-    final Property<String> buildNumber = project.objects.property(String)
+    Property<String> buildNumber = project.objects.property(String)
 
     /**
      * if releaseId is specified use it directly
      */
     @Input
     @Optional
-    final Property<String> releaseId = project.objects.property(String)
+    Property<String> releaseId = project.objects.property(String)
 
     /**
      * short_version like "2.6.0"
@@ -50,7 +49,7 @@ class DownloadTask extends AppcenterBaseTask {
      */
     @Input
     @Optional
-    final Property<String> releaseVersion = project.objects.property(String)
+    Property<String> releaseVersion = project.objects.property(String)
 
     @Input
     final Property<String> distributionGroup = project.objects.property(String)
@@ -60,15 +59,24 @@ class DownloadTask extends AppcenterBaseTask {
 
     @TaskAction
     def download() {
+        println(project.projectDir)
         if(releaseId.present){
             downloadWithReleaseId(releaseId.get())
+        } else {
+            downloadWithoutReleaseId()
         }
-        downloadWithoutReleaseId()
     }
 
-    def downloadWithReleaseId(String releaseId){
-        println "downloadWithReleaseId ${releaseId}"
-        def data=getData("/apps/${ownerName.get()}/${appName.get()}/releases/${releaseId}")
+    def downloadWithReleaseId(String releaseIdString){
+        println "downloadWithReleaseId ${releaseIdString}"
+        def data=getData("/apps/${ownerName.get()}/${appName.get()}/releases/${releaseIdString}")
+
+        //set version information so it can be used in gradle buildscript after executin the task
+        buildNumber=project.objects.property(String) //just setting did not work
+        buildNumber.set(data.version)
+        releaseVersion=project.objects.property(String)
+        releaseVersion.set(data.short_version)
+
         downloadFollowingRedirect(data.download_url, outPath.get(), data.short_version, data.version)
     }
 
@@ -136,16 +144,27 @@ class DownloadTask extends AppcenterBaseTask {
         }
     }
 
+    private static String getFileExtension(Path path) {
+        String name = path.getFileName().toString()
+        int lastIndexOf = name.lastIndexOf(".")
+        if (lastIndexOf == -1) {
+            return "" // empty extension
+        }
+        return name.substring(lastIndexOf)
+    }
+
+    //TODO refactor this
     def downloadFollowingRedirect(String url, String filename, String releaseVersionString, String buildNumberString) {
         Path targetPath=Paths.get(filename)
         println("Target path: "+targetPath.toAbsolutePath())
         Path targetDir=targetPath.getParent()
 
-        Files.createDirectories(targetDir) //new File(filename).getParentFile().mkdirs()
-        String versionFileName=appName.get()+"_"+releaseVersionString+"_"+buildNumberString+".apk"
+        Files.createDirectories(targetDir)
+        String versionFileName=appName.get()+"_"+releaseVersionString+"_"+buildNumberString+getFileExtension(targetPath)
         Path versionPath=targetDir.resolve(versionFileName)
 
         //TODO add forceDownload flag
+        //TODO replace filename check with data.fingerprint from appcenter (md5 hash)
         if(Files.notExists(versionPath)) {
             project.logger.lifecycle("Downloading ${url}")
             def redirectLimit = 10
