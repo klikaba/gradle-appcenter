@@ -121,7 +121,7 @@ class DownloadTask extends AppcenterBaseTask {
         releaseVersion=project.objects.property(String)
         releaseVersion.set(data.short_version)
         releaseId=project.objects.property(String)
-        releaseId.set(data.id)
+        releaseId.set(data.id as String)
     }
 
     static def getRelease(releaseList, String buildNumberString, String releaseVersionString) {
