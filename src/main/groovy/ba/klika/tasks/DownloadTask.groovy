@@ -1,6 +1,7 @@
 package ba.klika.tasks
 
 import groovyx.net.http.RESTClient
+import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.HttpStatus
 import org.gradle.api.GradleException
 import org.gradle.api.provider.Property
@@ -12,6 +13,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import java.security.DigestInputStream
+import java.security.MessageDigest
 import java.time.Instant
 
 class DownloadTask extends AppcenterBaseTask {
@@ -77,7 +80,7 @@ class DownloadTask extends AppcenterBaseTask {
         releaseVersion=project.objects.property(String)
         releaseVersion.set(data.short_version)
 
-        downloadFollowingRedirect(data.download_url, outPath.get(), data.short_version, data.version)
+        downloadFollowingRedirect(data.download_url, outPath.get(), data.short_version, data.version,data.fingerprint)
     }
 
     def downloadWithoutReleaseId() {
@@ -114,7 +117,7 @@ class DownloadTask extends AppcenterBaseTask {
             }
         } else {
             def data=getData("/apps/${ownerName.get()}/${appName.get()}/distribution_groups/${distributionGroup.get()}/releases/latest")
-            downloadFollowingRedirect(data.download_url, outPath.get(), data.short_version, data.version)
+            downloadFollowingRedirect(data.download_url, outPath.get(), data.short_version, data.version,data.fingerprint)
         }
     }
 
@@ -153,8 +156,21 @@ class DownloadTask extends AppcenterBaseTask {
         return name.substring(lastIndexOf)
     }
 
+    static String generateMD5(Path path) {
+        path.withInputStream {
+            DigestUtils.md5Hex(it) //using apache common utils
+            //or plain groovy / Java
+            /*new DigestInputStream(it, MessageDigest.getInstance('MD5')).withStream {
+                //DigestInputStream calculates the digest of the files sent through the stream.
+                //Therefore we need to consume the stream with the following line
+                it.eachByte 4096, {buffer, length -> }
+                it.messageDigest.digest().encodeHex() as String
+            }*/
+        }
+    }
+
     //TODO refactor this
-    def downloadFollowingRedirect(String url, String filename, String releaseVersionString, String buildNumberString) {
+    def downloadFollowingRedirect(String url, String filename, String releaseVersionString, String buildNumberString, String md5) {
         Path targetPath=Paths.get(filename)
         println("Target path: "+targetPath.toAbsolutePath())
         Path targetDir=targetPath.getParent()
@@ -164,8 +180,7 @@ class DownloadTask extends AppcenterBaseTask {
         Path versionPath=targetDir.resolve(versionFileName)
 
         //TODO add forceDownload flag
-        //TODO replace filename check with data.fingerprint from appcenter (md5 hash)
-        if(Files.notExists(versionPath)) {
+        if(Files.notExists(versionPath) || !generateMD5(versionPath).equalsIgnoreCase(md5)) {
             project.logger.lifecycle("Downloading ${url}")
             def redirectLimit = 10
 
