@@ -13,8 +13,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
-import java.security.DigestInputStream
-import java.security.MessageDigest
 import java.time.Instant
 
 class DownloadTask extends AppcenterBaseTask {
@@ -73,13 +71,7 @@ class DownloadTask extends AppcenterBaseTask {
     def downloadWithReleaseId(String releaseIdString){
         println "downloadWithReleaseId ${releaseIdString}"
         def data=getData("/apps/${ownerName.get()}/${appName.get()}/releases/${releaseIdString}")
-
-        //set version information so it can be used in gradle buildscript after executin the task
-        buildNumber=project.objects.property(String) //just setting did not work
-        buildNumber.set(data.version)
-        releaseVersion=project.objects.property(String)
-        releaseVersion.set(data.short_version)
-
+        setGradleVariables(data)
         downloadFollowingRedirect(data.download_url, outPath.get(), data.short_version, data.version,data.fingerprint)
     }
 
@@ -117,8 +109,19 @@ class DownloadTask extends AppcenterBaseTask {
             }
         } else {
             def data=getData("/apps/${ownerName.get()}/${appName.get()}/distribution_groups/${distributionGroup.get()}/releases/latest")
+            setGradleVariables(data)
             downloadFollowingRedirect(data.download_url, outPath.get(), data.short_version, data.version,data.fingerprint)
         }
+    }
+
+    def setGradleVariables(data){
+        //set version information so it can be used in gradle buildscript after executin the task
+        buildNumber=project.objects.property(String) //just setting did not work
+        buildNumber.set(data.version)
+        releaseVersion=project.objects.property(String)
+        releaseVersion.set(data.short_version)
+        releaseId=project.objects.property(String)
+        releaseId.set(data.id)
     }
 
     static def getRelease(releaseList, String buildNumberString, String releaseVersionString) {
