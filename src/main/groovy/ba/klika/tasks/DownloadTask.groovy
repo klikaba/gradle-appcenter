@@ -72,7 +72,7 @@ class DownloadTask extends AppcenterBaseTask {
         println "downloadWithReleaseId ${releaseIdString}"
         def data=getData("/apps/${ownerName.get()}/${appName.get()}/releases/${releaseIdString}")
         setGradleVariables(data)
-        downloadFollowingRedirect(data.download_url, outPath.get(), data.short_version, data.version,data.fingerprint)
+        downloadOrUseExistingFile(data)
     }
 
     def downloadWithoutReleaseId() {
@@ -110,7 +110,7 @@ class DownloadTask extends AppcenterBaseTask {
         } else {
             def data=getData("/apps/${ownerName.get()}/${appName.get()}/distribution_groups/${distributionGroup.get()}/releases/latest")
             setGradleVariables(data)
-            downloadFollowingRedirect(data.download_url, outPath.get(), data.short_version, data.version,data.fingerprint)
+            downloadOrUseExistingFile(data)
         }
     }
 
@@ -172,9 +172,14 @@ class DownloadTask extends AppcenterBaseTask {
         }
     }
 
-    //TODO refactor this
-    def downloadFollowingRedirect(String url, String filename, String releaseVersionString, String buildNumberString, String md5) {
-        Path targetPath=Paths.get(filename)
+    def downloadOrUseExistingFile(def data) {
+
+        String releaseVersionString=data.short_version
+        String buildNumberString=data.version
+        String md5=data.fingerprint
+        String url=data.download_url
+
+        Path targetPath=Paths.get(outPath.get())
         println("Target path: "+targetPath.toAbsolutePath())
         Path targetDir=targetPath.getParent()
 
@@ -184,31 +189,35 @@ class DownloadTask extends AppcenterBaseTask {
 
         //TODO add forceDownload flag
         if(Files.notExists(versionPath) || !generateMD5(versionPath).equalsIgnoreCase(md5)) {
-            project.logger.lifecycle("Downloading ${url}")
-            def redirectLimit = 10
-
-            while (url) {
-                new URL(url).openConnection(proxy).with { conn ->
-                    conn.instanceFollowRedirects = false
-                    url = conn.getHeaderField("Location")
-                    if (!url) {
-                        versionPath.withOutputStream { out ->
-                            conn.inputStream.with { inp ->
-                                out << inp
-                                inp.close()
-                            }
-                        }
-                    }
-                }
-                redirectLimit--
-                if (redirectLimit == 0) {
-                    throw new GradleException("Url have more than 10 redirects.")
-                }
-            }
+            download(url, versionPath)
         } else {
             println("Using existing app file")
         }
         Files.copy(versionPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+    }
+
+    def download(String url, Path targetPath) {
+        project.logger.lifecycle("Downloading ${url}")
+        def redirectLimit = 10
+
+        while (url) {
+            new URL(url).openConnection(proxy).with { conn ->
+                conn.instanceFollowRedirects = false
+                url = conn.getHeaderField("Location")
+                if (!url) {
+                    targetPath.withOutputStream { out ->
+                        conn.inputStream.with { inp ->
+                            out << inp
+                            inp.close()
+                        }
+                    }
+                }
+            }
+            redirectLimit--
+            if (redirectLimit == 0) {
+                throw new GradleException("Url have more than 10 redirects.")
+            }
+        }
     }
 }
 
