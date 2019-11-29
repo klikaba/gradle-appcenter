@@ -60,7 +60,6 @@ class DownloadTask extends AppcenterBaseTask {
 
     @TaskAction
     def download() {
-        println(project.projectDir)
         if(releaseId.present){
             downloadWithReleaseId(releaseId.get())
         } else {
@@ -69,14 +68,14 @@ class DownloadTask extends AppcenterBaseTask {
     }
 
     def downloadWithReleaseId(String releaseIdString){
-        println "downloadWithReleaseId ${releaseIdString}"
+        logger.lifecycle("downloadWithReleaseId ${releaseIdString}")
         def data=getData("/apps/${ownerName.get()}/${appName.get()}/releases/${releaseIdString}")
         setGradleVariables(data)
         downloadOrUseExistingFile(data)
     }
 
     def downloadWithoutReleaseId() {
-        println "downloadWithoutReleaseId"
+        logger.lifecycle("downloadWithoutReleaseId")
 
         /*  this is redundant as @Input already checks for presence
         if (!distributionGroup.get()) {
@@ -90,7 +89,7 @@ class DownloadTask extends AppcenterBaseTask {
         }*/
 
         if(buildNumber.present || releaseVersion.present){
-            println "buildNumber or version specified"
+            logger.lifecycle("buildNumber or version specified")
 
             RESTClient client = getRestClient("/apps/${ownerName.get()}/${appName.get()}/distribution_groups/${distributionGroup.get()}/releases")
             def callResponse = catchHttpExceptions { client.get(headers()) }
@@ -102,7 +101,6 @@ class DownloadTask extends AppcenterBaseTask {
                 if(!release){
                     throw new GradleException("No release found")
                 }
-                println (release)
                 downloadWithReleaseId(release.id as String)
             } else {
                 throw new GradleException("Error calling AppCenter. Status code " + callResponse.status + '\n' + callResponse.getData().toString())
@@ -180,7 +178,7 @@ class DownloadTask extends AppcenterBaseTask {
         String url=data.download_url
 
         Path targetPath=Paths.get(outPath.get())
-        println("Target path: "+targetPath.toAbsolutePath())
+        logger.lifecycle("Target path: $targetPath")
         Path targetDir=targetPath.getParent()
 
         Files.createDirectories(targetDir)
@@ -191,7 +189,7 @@ class DownloadTask extends AppcenterBaseTask {
         if(Files.notExists(versionPath) || !generateMD5(versionPath).equalsIgnoreCase(md5)) {
             download(url, versionPath)
         } else {
-            println("Using existing app file")
+            logger.lifecycle("Using existing app file: $versionPath")
         }
         Files.copy(versionPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
     }
