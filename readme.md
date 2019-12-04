@@ -12,7 +12,7 @@ File : `build.gradle`
 
 ```groovy
 plugins {
-  id "ba.klika.appcenter" version "1.3"
+  id "ba.klika.appcenter" version "1.4"
 }
 ```
 
@@ -26,7 +26,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.ba.klika:appcenter:1.3"
+    classpath "gradle.plugin.ba.klika:appcenter:1.4"
   }
 }
 
@@ -67,7 +67,33 @@ f1e96430-d476-4f22-ac85-8f8fd282a582|        Android|               Klika|  MyWa
 BUILD SUCCESSFUL in 9s
 1 actionable task: 1 executed
 ```
+### Download Task
+#### Arguments
 
+* Required
+  - `ownerName`
+  - `appName`
+  - `distributionGroup`
+  - `outPath`: Path including filename with extension where the app will be saved. \
+  In the same folder there also will be a copy of the file named like the following:
+  `$appName_$releaseVersion_$buildNumber` \
+  In case folders are not existing they will be created. To target a folder relative to your project dir use `"$project.projectDir/yourDir/app.apk"` and not `"./"`
+* Optional
+  - `releaseId`: id in [App Center API](https://openapi.appcenter.ms/#/distribute/releases_listByDistributionGroup) (not id of getApps task)
+  - `releaseVersion`: short_version in [App Center API](https://openapi.appcenter.ms/#/distribute/releases_listByDistributionGroup)
+  - `buildNumber`: version in [App Center API](https://openapi.appcenter.ms/#/distribute/releases_listByDistributionGroup)
+  
+You can use any combination of above optional arguments. \
+The order of importance for resolving to a specific release is as follows: 
+
+`releaseId > buildNumber > releaseVersion > nothing (=latest)`
+
+If only the `releaseVersion` is given the latest build of it will be chosen, if both `releaseVersion` and `buildNumber` are present both need to match on one release.
+In case none of the optional arguments are specified the latest overall release will be used.
+ 
+Before the actual download is started it is checked if a file with matching naming of `$appName_$releaseVersion_$buildNumber` exists and if it matches the `fingerprint` (md5) received from app center api.
+In this case the existing file will be used instead and copied to the filename specified in `outPath`
+  
 In case that you want to run `:download` task before tests are executed just add:
 
 File : `build.gradle`
@@ -82,14 +108,14 @@ test.dependsOn {
         ownerName = "Klika"
         appName = "TestApp"
         distributionGroup = "QA"
-        outPath = "./test-app.ipa"
+        outPath = "$project.projectDir/test-app.ipa"
     }
 }
 ```
 
 This will download latest release of `TestApp`.
 
-### Multiple Downloads
+#### Multiple Downloads
 
 Usually you will want to download Android and iOS app and execute same tests on them. To execute more than one download
 task you can do something like:
@@ -100,7 +126,7 @@ task downloadIPA(type: ba.klika.tasks.DownloadTask) {
     ownerName = "Klika"
     appName = "TestApp"
     distributionGroup = "QA"
-    outPath = "./test-app.ipa"
+    outPath = "$project.projectDir/test-app.ipa"
 }
 
 task downloadAPK(type: ba.klika.tasks.DownloadTask) {
@@ -108,7 +134,7 @@ task downloadAPK(type: ba.klika.tasks.DownloadTask) {
     ownerName = "Klika"
     appName = "TestApp-1"
     distributionGroup = "QA"
-    outPath = "./test.apk"
+    outPath = "$project.projectDir/test.apk"
 }
 
 test.dependsOn {
@@ -120,6 +146,35 @@ test.dependsOn {
 }
 ```
 
+#### Accessing version information of downloaded app
+After running the download task you can access all the version information with the argument names also used to define it, for example to pass them into some testing task. \
+They get populated with the information fetched from app center api during the download task and therefore are also available in case you did not specify them before.  
+```groovy
+task printVersionInfo(){
+    dependsOn(downloadAPK)
+    doLast {
+        println("appName:"+tasks.downloadAPK.appName.getOrNull())
+        println("buildNumber:"+tasks.downloadAPK.buildNumber.getOrNull())
+        println("releaseVersion:"+tasks.downloadAPK.releaseVersion.getOrNull())
+        println("releaseVersion:"+tasks.downloadAPK.releaseId.getOrNull())
+    }
+}
+```
+
+#### Cleanup target folder
+As the plugin stores app version for reuse and does not cleanup itself you need to take care of it using a gradle task like the following:
+```groovy
+task deleteAppFiles(type: Delete) {
+    dependsOn(clean)
+    def cutoff = LocalDateTime.now().minusWeeks(1) //remove all files which got modified before today minus 1 week
+    delete fileTree (dir: "$project.projectDir/app/")
+            .matching{ include '*.apk', '*.ipa' }
+            .findAll {
+                def fileDate = Instant.ofEpochMilli(it.lastModified()).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                fileDate.isBefore(cutoff)
+            }
+}
+```
 
 ### Example 1
 
@@ -128,7 +183,7 @@ Simple script to download APK from AppCenter before tests:
 ```groovy
 plugins {
     id 'java'
-    id 'ba.klika.appcenter' version '1.3'
+    id 'ba.klika.appcenter' version '1.4'
 }
 
 group 'ba.klika.appcenter.automation-test'
@@ -163,7 +218,7 @@ Simple script to download APK and IPA build from AppCenter before tests:
 ```groovy
 plugins {
     id 'java'
-    id 'ba.klika.appcenter' version '1.3'
+    id 'ba.klika.appcenter' version '1.4'
 }
 
 group 'ba.klika.appcenter.automation-test'
@@ -205,3 +260,98 @@ test.dependsOn {
     downloadAPK
 }
 ```
+
+### Example with optional arguments, cleanup task and nebula override
+```groovy
+import ba.klika.tasks.DownloadTask
+
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+
+plugins {
+    id 'java'
+    id "ba.klika.appcenter" version "1.4"
+    id 'nebula.override' version '3.0.2'
+}
+
+group 'ba.klika.appcenter.automation-test'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+appcenter {
+    apiToken = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+}
+
+task downloadIPA(type: DownloadTask) {
+    apiToken = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+    ownerName = 'Klika'
+    appName = 'TestApp-1'
+    distributionGroup = 'QA'
+    outPath = "$project.projectDir/app/test.ipa"
+}
+
+/*
+ * to call from command line and override settings use:
+ *
+ * gradle -Doverride.downloadAPK.releaseId="989" downloadAPK
+ * (made possible by nebula.override plugin)
+ *
+ * Prioritization:
+ * releaseId > buildNumber > releaseVersion > nothing (=latest)
+ */
+task downloadAPK(type: DownloadTask) {
+    apiToken = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+    ownerName = 'Klika'
+    appName = 'TestApp'
+    distributionGroup = 'QA'
+    //buildNumber = "123456"
+    releaseVersion = "1.2.3"
+    //releaseId="10"
+    outPath = "$project.projectDir/app/test.apk"
+}
+
+task printVersionInfo(){
+    dependsOn(downloadAPK)
+    doLast {
+        println("appName:"+tasks.downloadAPK.appName.getOrNull())
+        println("buildNumber:"+tasks.downloadAPK.buildNumber.getOrNull())
+        println("releaseVersion:"+tasks.downloadAPK.releaseVersion.getOrNull())
+        println("releaseVersion:"+tasks.downloadAPK.releaseId.getOrNull())
+    }
+}
+
+task deleteAppFiles(type: Delete) {
+    dependsOn(clean)
+    def cutoff = LocalDateTime.now().minusWeeks(1)
+    delete fileTree (dir: "$project.projectDir/app/")
+            .matching{ include '*.apk', '*.ipa' }
+            .findAll {
+                def fileDate = Instant.ofEpochMilli(it.lastModified()).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                fileDate.isBefore(cutoff)
+            }
+}
+
+test.dependsOn {
+    downloadIPA
+}
+
+test.dependsOn {
+    downloadAPK
+}
+```
+
+## Proxy Support
+The plugin picks up the same variables which are used to set the proxy for gradle in `gradle.properties` \
+To be more specific:
+ - `http.proxyHost`
+ - `http.proxyPort`
+ 
+**Authentication and http.nonProxyHosts is not supported.**
