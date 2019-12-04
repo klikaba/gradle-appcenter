@@ -76,8 +76,8 @@ BUILD SUCCESSFUL in 9s
   - `distributionGroup`
   - `outPath`: Path including filename with extension where the app will be saved. \
   In the same folder there also will be a copy of the file named like the following:
-  $appName_$releaseVersion_$buildNumber \
-  In case folders are not existing they will be created.
+  `$appName_$releaseVersion_$buildNumber` \
+  In case folders are not existing they will be created. To target a folder relative to your project dir use `"$project.projectDir/yourDir/app.apk"` and not `"./"`
 * Optional
   - `releaseId`: id in [App Center API](https://openapi.appcenter.ms/#/distribute/releases_listByDistributionGroup) (not id of getApps task)
   - `releaseVersion`: short_version in [App Center API](https://openapi.appcenter.ms/#/distribute/releases_listByDistributionGroup)
@@ -90,6 +90,9 @@ The order of importance for resolving to a specific release is as follows:
 
 If only the `releaseVersion` is given the latest build of it will be chosen, if both `releaseVersion` and `buildNumber` are present both need to match on one release.
 In case none of the optional arguments are specified the latest overall release will be used.
+ 
+Before the actual download is started it is checked if a file with matching naming of `$appName_$releaseVersion_$buildNumber` exists and if it matches the `fingerprint` (md5) received from app center api.
+In this case the existing file will be used instead and copied to the filename specified in `outPath`
   
 In case that you want to run `:download` task before tests are executed just add:
 
@@ -105,7 +108,7 @@ test.dependsOn {
         ownerName = "Klika"
         appName = "TestApp"
         distributionGroup = "QA"
-        outPath = "./test-app.ipa"
+        outPath = "$project.projectDir/test-app.ipa"
     }
 }
 ```
@@ -123,7 +126,7 @@ task downloadIPA(type: ba.klika.tasks.DownloadTask) {
     ownerName = "Klika"
     appName = "TestApp"
     distributionGroup = "QA"
-    outPath = "./test-app.ipa"
+    outPath = "$project.projectDir/test-app.ipa"
 }
 
 task downloadAPK(type: ba.klika.tasks.DownloadTask) {
@@ -131,7 +134,7 @@ task downloadAPK(type: ba.klika.tasks.DownloadTask) {
     ownerName = "Klika"
     appName = "TestApp-1"
     distributionGroup = "QA"
-    outPath = "./test.apk"
+    outPath = "$project.projectDir/test.apk"
 }
 
 test.dependsOn {
@@ -155,6 +158,21 @@ task printVersionInfo(){
         println("releaseVersion:"+tasks.downloadAPK.releaseVersion.getOrNull())
         println("releaseVersion:"+tasks.downloadAPK.releaseId.getOrNull())
     }
+}
+```
+
+#### Cleanup target folder
+As the plugin stores app version for reuse and does not cleanup itself you need to take care of it using a gradle task like the following:
+```groovy
+task deleteAppFiles(type: Delete) {
+    dependsOn(clean)
+    def cutoff = LocalDateTime.now().minusWeeks(1) //remove all files which got modified before today minus 1 week
+    delete fileTree (dir: "$project.projectDir/app/")
+            .matching{ include '*.apk', '*.ipa' }
+            .findAll {
+                def fileDate = Instant.ofEpochMilli(it.lastModified()).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                fileDate.isBefore(cutoff)
+            }
 }
 ```
 
@@ -242,3 +260,11 @@ test.dependsOn {
     downloadAPK
 }
 ```
+
+## Proxy Support
+The plugin picks up the same variables which are used to set the proxy for gradle in `gradle.properties` \
+To be more specific:
+ - `http.proxyHost`
+ - `http.proxyPort`
+ 
+**Authentication and http.nonProxyHosts is not supported.**
