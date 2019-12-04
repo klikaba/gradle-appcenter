@@ -261,6 +261,93 @@ test.dependsOn {
 }
 ```
 
+### Example with optional arguments, cleanup task and nebula override
+```groovy
+import ba.klika.tasks.DownloadTask
+
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+
+plugins {
+    id 'java'
+    id "ba.klika.appcenter" version "1.4"
+    id 'nebula.override' version '3.0.2'
+}
+
+group 'ba.klika.appcenter.automation-test'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+appcenter {
+    apiToken = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+}
+
+task downloadIPA(type: DownloadTask) {
+    apiToken = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+    ownerName = 'Klika'
+    appName = 'TestApp-1'
+    distributionGroup = 'QA'
+    outPath = "$project.projectDir/app/test.ipa"
+}
+
+/*
+ * to call from command line and override settings use:
+ *
+ * gradle -Doverride.downloadAPK.releaseId="989" downloadAPK
+ * (made possible by nebula.override plugin)
+ *
+ * Prioritization:
+ * releaseId > buildNumber > releaseVersion > nothing (=latest)
+ */
+task downloadAPK(type: DownloadTask) {
+    apiToken = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
+    ownerName = 'Klika'
+    appName = 'TestApp'
+    distributionGroup = 'QA'
+    //buildNumber = "123456"
+    releaseVersion = "1.2.3"
+    //releaseId="10"
+    outPath = "$project.projectDir/app/test.apk"
+}
+
+task printVersionInfo(){
+    dependsOn(downloadAPK)
+    doLast {
+        println("appName:"+tasks.downloadAPK.appName.getOrNull())
+        println("buildNumber:"+tasks.downloadAPK.buildNumber.getOrNull())
+        println("releaseVersion:"+tasks.downloadAPK.releaseVersion.getOrNull())
+        println("releaseVersion:"+tasks.downloadAPK.releaseId.getOrNull())
+    }
+}
+
+task deleteAppFiles(type: Delete) {
+    dependsOn(clean)
+    def cutoff = LocalDateTime.now().minusWeeks(1)
+    delete fileTree (dir: "$project.projectDir/app/")
+            .matching{ include '*.apk', '*.ipa' }
+            .findAll {
+                def fileDate = Instant.ofEpochMilli(it.lastModified()).atZone(ZoneId.systemDefault()).toLocalDateTime()
+                fileDate.isBefore(cutoff)
+            }
+}
+
+test.dependsOn {
+    downloadIPA
+}
+
+test.dependsOn {
+    downloadAPK
+}
+```
+
 ## Proxy Support
 The plugin picks up the same variables which are used to set the proxy for gradle in `gradle.properties` \
 To be more specific:
