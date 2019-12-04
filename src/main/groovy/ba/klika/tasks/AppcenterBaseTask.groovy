@@ -13,7 +13,6 @@ abstract class AppcenterBaseTask extends DefaultTask {
     @Input
     final Property<String> apiToken = project.objects.property(String)
 
-    //TODO also support auth
     private final String proxyHost
     private final Integer proxyPort
     protected final Proxy proxy

@@ -16,11 +16,7 @@ import java.nio.file.StandardCopyOption
 import java.time.Instant
 
 class DownloadTask extends AppcenterBaseTask {
-    /**
-     * Provider represents a value that can only be queried and cannot be changed.
-     * Property represents a value that can be queried and also changed.
-     * https://docs.gradle.org/current/userguide/lazy_configuration.html
-     */
+
     @Input
     final Property<String> ownerName = project.objects.property(String)
     @Input
@@ -185,13 +181,12 @@ class DownloadTask extends AppcenterBaseTask {
         String versionFileName=appName.get()+"_"+releaseVersionString+"_"+buildNumberString+getFileExtension(targetPath)
         Path versionPath=targetDir.resolve(versionFileName)
 
-        //TODO add forceDownload flag
         if(Files.notExists(versionPath) || !generateMD5(versionPath).equalsIgnoreCase(md5)) {
             download(url, versionPath)
         } else {
             logger.lifecycle("Using existing app file: $versionPath")
         }
-        Files.copy(versionPath, targetPath, StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(versionPath, targetPath, StandardCopyOption.REPLACE_EXISTING)
     }
 
     def download(String url, Path targetPath) {
