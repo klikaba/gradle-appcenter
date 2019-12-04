@@ -12,7 +12,7 @@ File : `build.gradle`
 
 ```groovy
 plugins {
-  id "ba.klika.appcenter" version "1.3"
+  id "ba.klika.appcenter" version "1.4"
 }
 ```
 
@@ -26,7 +26,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.ba.klika:appcenter:1.3"
+    classpath "gradle.plugin.ba.klika:appcenter:1.4"
   }
 }
 
@@ -67,7 +67,30 @@ f1e96430-d476-4f22-ac85-8f8fd282a582|        Android|               Klika|  MyWa
 BUILD SUCCESSFUL in 9s
 1 actionable task: 1 executed
 ```
+### Download Task
+#### Arguments
 
+* Required
+  - `ownerName`
+  - `appName`
+  - `distributionGroup`
+  - `outPath`: Path including filename with extension where the app will be saved. \
+  In the same folder there also will be a copy of the file named like the following:
+  $appName_$releaseVersion_$buildNumber \
+  In case folders are not existing they will be created.
+* Optional
+  - `releaseId`: id in [App Center API](https://openapi.appcenter.ms/#/distribute/releases_listByDistributionGroup) (not id of getApps task)
+  - `releaseVersion`: short_version in [App Center API](https://openapi.appcenter.ms/#/distribute/releases_listByDistributionGroup)
+  - `buildNumber`: version in [App Center API](https://openapi.appcenter.ms/#/distribute/releases_listByDistributionGroup)
+  
+You can use any combination of above optional arguments. \
+The order of importance for resolving to a specific release is as follows: 
+
+`releaseId > buildNumber > releaseVersion > nothing (=latest)`
+
+If only the `releaseVersion` is given the latest build of it will be chosen, if both `releaseVersion` and `buildNumber` are present both need to match on one release.
+In case none of the optional arguments are specified the latest overall release will be used.
+  
 In case that you want to run `:download` task before tests are executed just add:
 
 File : `build.gradle`
@@ -89,7 +112,7 @@ test.dependsOn {
 
 This will download latest release of `TestApp`.
 
-### Multiple Downloads
+#### Multiple Downloads
 
 Usually you will want to download Android and iOS app and execute same tests on them. To execute more than one download
 task you can do something like:
@@ -120,6 +143,20 @@ test.dependsOn {
 }
 ```
 
+#### Accessing version information of downloaded app
+After running the download task you can access all the version information with the argument names also used to define it, for example to pass them into some testing task. \
+They get populated with the information fetched from app center api during the download task and therefore are also available in case you did not specify them before.  
+```groovy
+task printVersionInfo(){
+    dependsOn(downloadAPK)
+    doLast {
+        println("appName:"+tasks.downloadAPK.appName.getOrNull())
+        println("buildNumber:"+tasks.downloadAPK.buildNumber.getOrNull())
+        println("releaseVersion:"+tasks.downloadAPK.releaseVersion.getOrNull())
+        println("releaseVersion:"+tasks.downloadAPK.releaseId.getOrNull())
+    }
+}
+```
 
 ### Example 1
 
@@ -128,7 +165,7 @@ Simple script to download APK from AppCenter before tests:
 ```groovy
 plugins {
     id 'java'
-    id 'ba.klika.appcenter' version '1.3'
+    id 'ba.klika.appcenter' version '1.4'
 }
 
 group 'ba.klika.appcenter.automation-test'
@@ -163,7 +200,7 @@ Simple script to download APK and IPA build from AppCenter before tests:
 ```groovy
 plugins {
     id 'java'
-    id 'ba.klika.appcenter' version '1.3'
+    id 'ba.klika.appcenter' version '1.4'
 }
 
 group 'ba.klika.appcenter.automation-test'
