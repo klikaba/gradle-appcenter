@@ -97,7 +97,7 @@ class DownloadTask extends AppcenterBaseTask {
                     throw new GradleException("Error calling AppCenter. Status code " + callResponse.status + '\n' + callResponse.getData().toString())
                 }
             } else {
-                logger.lifecycle("no version information specified, downloading latest release")
+                logger.lifecycle("no version information specified, getting data of latest release")
                 releaseData = getData("/apps/${ownerName.get()}/${appName.get()}/distribution_groups/${distributionGroup.get()}/releases/latest")
             }
         }
