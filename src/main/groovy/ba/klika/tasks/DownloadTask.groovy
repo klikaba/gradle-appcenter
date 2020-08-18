@@ -59,9 +59,7 @@ class DownloadTask extends AppcenterBaseTask {
     @Optional
     final Property<Boolean> skipDownload = project.objects.property(Boolean)
 
-    @Input
-    @Optional
-    Property<String> downloadURL = project.objects.property(String)
+    String downloadURL = "notSet"
 
     @TaskAction
     def download() {
@@ -122,8 +120,7 @@ class DownloadTask extends AppcenterBaseTask {
         releaseId=project.objects.property(String)
         releaseId.set(data.id as String)
         //TODO set data.download_url to some output property
-        downloadURL = project.objects.property(String)
-        downloadURL.set(data.download_url)
+        downloadURL = data.download_url
     }
 
     static def getRelease(releaseList, String buildNumberString, String releaseVersionString) {
