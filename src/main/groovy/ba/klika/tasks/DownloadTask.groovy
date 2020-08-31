@@ -1,5 +1,6 @@
 package ba.klika.tasks
 
+
 import groovyx.net.http.RESTClient
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.http.HttpStatus
@@ -54,58 +55,60 @@ class DownloadTask extends AppcenterBaseTask {
     @Input
     final Property<String> outPath = project.objects.property(String)
 
+    @Input
+    @Optional
+    final Property<Boolean> skipDownload = project.objects.property(Boolean)
+
+    String downloadURL = "notSet"
+
     @TaskAction
     def download() {
+
+        def releaseData = getReleaseData();
+        setGradleVariables(releaseData);
+
+        if(skipDownload.getOrElse(false)){
+            logger.lifecycle("skipping download");
+        } else {
+            downloadOrUseExistingFile(releaseData);
+        }
+    }
+
+    def getReleaseData() {
+        def releaseData;
         if(releaseId.present){
-            downloadWithReleaseId(releaseId.get())
+            releaseData = getReleaseData(releaseId.get());
         } else {
-            downloadWithoutReleaseId()
-        }
-    }
+            logger.lifecycle("get release data without releaseId")
 
-    def downloadWithReleaseId(String releaseIdString){
-        logger.lifecycle("downloadWithReleaseId ${releaseIdString}")
-        def data=getData("/apps/${ownerName.get()}/${appName.get()}/releases/${releaseIdString}")
-        setGradleVariables(data)
-        downloadOrUseExistingFile(data)
-    }
+            if(buildNumber.present || releaseVersion.present){
+                logger.lifecycle("buildNumber or version specified")
 
-    def downloadWithoutReleaseId() {
-        logger.lifecycle("downloadWithoutReleaseId")
+                RESTClient client = getRestClient("/apps/${ownerName.get()}/${appName.get()}/distribution_groups/${distributionGroup.get()}/releases")
+                def callResponse = catchHttpExceptions { client.get(headers()) }
 
-        /*  this is redundant as @Input already checks for presence
-        if (!distributionGroup.get()) {
-            throw new GradleException("distributionGroup field must not be empty!")
-        }
-        if (!ownerName.get()) {
-            throw new GradleException("ownerName field must no tbe empty!")
-        }
-        if (!appName.get()) {
-            throw new GradleException("appName field must no tbe empty!")
-        }*/
+                if (callResponse.status == HttpStatus.SC_OK) {
+                    def list = callResponse.getData()
+                    def release = getRelease(list, buildNumber.orNull, releaseVersion.orNull)
 
-        if(buildNumber.present || releaseVersion.present){
-            logger.lifecycle("buildNumber or version specified")
-
-            RESTClient client = getRestClient("/apps/${ownerName.get()}/${appName.get()}/distribution_groups/${distributionGroup.get()}/releases")
-            def callResponse = catchHttpExceptions { client.get(headers()) }
-
-            if (callResponse.status == HttpStatus.SC_OK) {
-                def list = callResponse.getData()
-                def release = getRelease(list, buildNumber.orNull, releaseVersion.orNull)
-
-                if(!release){
-                    throw new GradleException("No release found")
+                    if(!release){
+                        throw new GradleException("No release found")
+                    }
+                    releaseData = getReleaseData(release.id as String)
+                } else {
+                    throw new GradleException("Error calling AppCenter. Status code " + callResponse.status + '\n' + callResponse.getData().toString())
                 }
-                downloadWithReleaseId(release.id as String)
             } else {
-                throw new GradleException("Error calling AppCenter. Status code " + callResponse.status + '\n' + callResponse.getData().toString())
+                logger.lifecycle("no version information specified, getting data of latest release")
+                releaseData = getData("/apps/${ownerName.get()}/${appName.get()}/distribution_groups/${distributionGroup.get()}/releases/latest")
             }
-        } else {
-            def data=getData("/apps/${ownerName.get()}/${appName.get()}/distribution_groups/${distributionGroup.get()}/releases/latest")
-            setGradleVariables(data)
-            downloadOrUseExistingFile(data)
         }
+        return releaseData;
+    }
+
+    def getReleaseData(String releaseIdString){
+        logger.lifecycle("get release data with releaseId ${releaseIdString}")
+        return getData("/apps/${ownerName.get()}/${appName.get()}/releases/${releaseIdString}")
     }
 
     def setGradleVariables(data){
@@ -116,6 +119,8 @@ class DownloadTask extends AppcenterBaseTask {
         releaseVersion.set(data.short_version)
         releaseId=project.objects.property(String)
         releaseId.set(data.id as String)
+        //TODO set data.download_url to some output property
+        downloadURL = data.download_url
     }
 
     static def getRelease(releaseList, String buildNumberString, String releaseVersionString) {
