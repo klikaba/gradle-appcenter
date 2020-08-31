@@ -82,6 +82,7 @@ BUILD SUCCESSFUL in 9s
   - `releaseId`: id in [App Center API](https://openapi.appcenter.ms/#/distribute/releases_listByDistributionGroup) (not id of getApps task)
   - `releaseVersion`: short_version in [App Center API](https://openapi.appcenter.ms/#/distribute/releases_listByDistributionGroup)
   - `buildNumber`: version in [App Center API](https://openapi.appcenter.ms/#/distribute/releases_listByDistributionGroup)
+  - `skipDownload`: when setting this flag to true the actual download is skipped (in case you want to call the download URL yourself)
   
 You can use any combination of above optional arguments. \
 The order of importance for resolving to a specific release is as follows: 
@@ -345,6 +346,28 @@ test.dependsOn {
 
 test.dependsOn {
     downloadAPK
+}
+```
+
+### Example DownloadTask usage with skipDownload flag
+
+```
+task downloadAPK(type: DownloadTask) {
+    group = 'verification'
+    apiToken = '4004886395ed81baf8da7fe020269521551828a4'
+    ownerName = 'BAWAG-P-S-K-Organization'
+    appName = 'Klar-POC-1'
+    distributionGroup = 'BAWAG-PSK-LUCY'
+    //buildNumber = "1574091737"
+    //releaseVersion = "2.6.0"
+    //releaseId="982"
+    skipDownload = true
+    //use $project.projectDir so it definitely gets created in project folder and don't rely on working directory of Java Path or File API
+    outPath = "$project.projectDir/app/app-bawagpsk-uat.apk"
+
+    doLast {
+        println(downloadURL)  // if you don't access downloadUrl in doLast it won't be set yet
+    }
 }
 ```
 
