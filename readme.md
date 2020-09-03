@@ -354,7 +354,7 @@ test.dependsOn {
 ```
 task downloadAPK(type: DownloadTask) {
     group = 'verification'
-    apiToken = '4004886395ed81baf8da7fe020269521551828a4'
+    apiToken = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
     ownerName = 'BAWAG-P-S-K-Organization'
     appName = 'Klar-POC-1'
     distributionGroup = 'BAWAG-PSK-LUCY'
