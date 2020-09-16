@@ -7,7 +7,7 @@ plugins {
 }
 
 group 'ba.klika'
-version '1.4'
+version '1.6'
 
 //  pugin metadata configuration
 pluginBundle {
