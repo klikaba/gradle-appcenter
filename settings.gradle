@@ -1,3 +1,2 @@
 rootProject.name = 'appcenter'
 enableFeaturePreview('STABLE_PUBLISHING')
-

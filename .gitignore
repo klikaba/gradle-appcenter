@@ -16,7 +16,7 @@
 hs_err_pid*
 
 # intellij
-.idea
+.idea/
 
 ### Gradle ###
 .gradle
