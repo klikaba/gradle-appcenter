@@ -12,7 +12,7 @@ File : `build.gradle`
 
 ```groovy
 plugins {
-  id "ba.klika.appcenter" version "1.4"
+  id "ba.klika.appcenter" version "1.7"
 }
 ```
 
@@ -26,7 +26,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.ba.klika:appcenter:1.4"
+    classpath "gradle.plugin.ba.klika:appcenter:1.7"
   }
 }
 
@@ -74,26 +74,18 @@ BUILD SUCCESSFUL in 9s
   - `ownerName`
   - `appName`
   - `distributionGroup`
-  - `outPath`: Path including filename with extension where the app will be saved. \
-  In the same folder there also will be a copy of the file named like the following:
-  `$appName_$releaseVersion_$buildNumber` \
-  In case folders are not existing they will be created. To target a folder relative to your project dir use `"$project.projectDir/yourDir/app.apk"` and not `"./"`
+  - `outPath`: Directory Path where the app will be saved
 * Optional
   - `releaseId`: id in [App Center API](https://openapi.appcenter.ms/#/distribute/releases_listByDistributionGroup) (not id of getApps task)
   - `releaseVersion`: short_version in [App Center API](https://openapi.appcenter.ms/#/distribute/releases_listByDistributionGroup)
-  - `buildNumber`: version in [App Center API](https://openapi.appcenter.ms/#/distribute/releases_listByDistributionGroup)
   - `skipDownload`: when setting this flag to true the actual download is skipped (in case you want to call the download URL yourself)
   
 You can use any combination of above optional arguments. \
 The order of importance for resolving to a specific release is as follows: 
 
-`releaseId > buildNumber > releaseVersion > nothing (=latest)`
-
-If only the `releaseVersion` is given the latest build of it will be chosen, if both `releaseVersion` and `buildNumber` are present both need to match on one release.
-In case none of the optional arguments are specified the latest overall release will be used.
+`releaseId > > releaseVersion > nothing (=latest)`
  
-Before the actual download is started it is checked if a file with matching naming of `$appName_$releaseVersion_$buildNumber` exists and if it matches the `fingerprint` (md5) received from app center api.
-In this case the existing file will be used instead and copied to the filename specified in `outPath`
+Before the actual download starts, it check for a file with matching naming of `$appName_$shortVersion_$version.$fileExtension` in the output folder and the `fingerprint` (md5) received from app center api. If both matches download will be skipped.
   
 In case that you want to run `:download` task before tests are executed just add:
 
@@ -109,7 +101,7 @@ test.dependsOn {
         ownerName = "Klika"
         appName = "TestApp"
         distributionGroup = "QA"
-        outPath = "$project.projectDir/test-app.ipa"
+        outPath = "$project.projectDir"
     }
 }
 ```
@@ -127,7 +119,7 @@ task downloadIPA(type: ba.klika.tasks.DownloadTask) {
     ownerName = "Klika"
     appName = "TestApp"
     distributionGroup = "QA"
-    outPath = "$project.projectDir/test-app.ipa"
+    outPath = "$project.projectDir/app"
 }
 
 task downloadAPK(type: ba.klika.tasks.DownloadTask) {
@@ -135,7 +127,7 @@ task downloadAPK(type: ba.klika.tasks.DownloadTask) {
     ownerName = "Klika"
     appName = "TestApp-1"
     distributionGroup = "QA"
-    outPath = "$project.projectDir/test.apk"
+    outPath = "$project.projectDir/app"
 }
 
 test.dependsOn {
@@ -155,9 +147,8 @@ task printVersionInfo(){
     dependsOn(downloadAPK)
     doLast {
         println("appName:"+tasks.downloadAPK.appName.getOrNull())
-        println("buildNumber:"+tasks.downloadAPK.buildNumber.getOrNull())
+        println("releaseId:"+tasks.downloadAPK.releaseId.getOrNull())
         println("releaseVersion:"+tasks.downloadAPK.releaseVersion.getOrNull())
-        println("releaseVersion:"+tasks.downloadAPK.releaseId.getOrNull())
     }
 }
 ```
@@ -184,7 +175,7 @@ Simple script to download APK from AppCenter before tests:
 ```groovy
 plugins {
     id 'java'
-    id 'ba.klika.appcenter' version '1.4'
+    id 'ba.klika.appcenter' version '1.7'
 }
 
 group 'ba.klika.appcenter.automation-test'
@@ -207,7 +198,7 @@ test.dependsOn {
         ownerName = 'Klika'
         appName = 'TestApp'
         distributionGroup = 'QA'
-        outPath = './test-app.ipa'
+        outPath = './'
     }
 }
 ```
@@ -219,7 +210,7 @@ Simple script to download APK and IPA build from AppCenter before tests:
 ```groovy
 plugins {
     id 'java'
-    id 'ba.klika.appcenter' version '1.4'
+    id 'ba.klika.appcenter' version '1.7'
 }
 
 group 'ba.klika.appcenter.automation-test'
@@ -242,7 +233,7 @@ task downloadIPA(type: ba.klika.tasks.DownloadTask) {
     ownerName = 'Klika'
     appName = 'TestApp'
     distributionGroup = 'QA'
-    outPath = './test-app.ipa'
+    outPath = './'
 }
 
 task downloadAPK(type: ba.klika.tasks.DownloadTask) {
@@ -250,7 +241,7 @@ task downloadAPK(type: ba.klika.tasks.DownloadTask) {
     ownerName = 'Klika'
     appName = 'TestApp-1'
     distributionGroup = 'QA'
-    outPath = './test-app.apk'
+    outPath = './'
 }
 
 test.dependsOn {
@@ -272,7 +263,7 @@ import java.time.ZoneId
 
 plugins {
     id 'java'
-    id "ba.klika.appcenter" version "1.4"
+    id "ba.klika.appcenter" version "1.7"
     id 'nebula.override' version '3.0.2'
 }
 
@@ -296,7 +287,7 @@ task downloadIPA(type: DownloadTask) {
     ownerName = 'Klika'
     appName = 'TestApp-1'
     distributionGroup = 'QA'
-    outPath = "$project.projectDir/app/test.ipa"
+    outPath = "$project.projectDir/app/"
 }
 
 /*
@@ -306,26 +297,24 @@ task downloadIPA(type: DownloadTask) {
  * (made possible by nebula.override plugin)
  *
  * Prioritization:
- * releaseId > buildNumber > releaseVersion > nothing (=latest)
+ * releaseId > releaseVersion > nothing (=latest)
  */
 task downloadAPK(type: DownloadTask) {
     apiToken = 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxx'
     ownerName = 'Klika'
     appName = 'TestApp'
     distributionGroup = 'QA'
-    //buildNumber = "123456"
     releaseVersion = "1.2.3"
     //releaseId="10"
-    outPath = "$project.projectDir/app/test.apk"
+    outPath = "$project.projectDir/app/"
 }
 
 task printVersionInfo(){
     dependsOn(downloadAPK)
     doLast {
         println("appName:"+tasks.downloadAPK.appName.getOrNull())
-        println("buildNumber:"+tasks.downloadAPK.buildNumber.getOrNull())
+        println("releaseId:"+tasks.downloadAPK.releaseId.getOrNull())
         println("releaseVersion:"+tasks.downloadAPK.releaseVersion.getOrNull())
-        println("releaseVersion:"+tasks.downloadAPK.releaseId.getOrNull())
     }
 }
 
@@ -358,12 +347,10 @@ task downloadAPK(type: DownloadTask) {
     ownerName = 'BAWAG-P-S-K-Organization'
     appName = 'Klar-POC-1'
     distributionGroup = 'BAWAG-PSK-LUCY'
-    //buildNumber = "1574091737"
     //releaseVersion = "2.6.0"
     //releaseId="982"
     skipDownload = true
-    //use $project.projectDir so it definitely gets created in project folder and don't rely on working directory of Java Path or File API
-    outPath = "$project.projectDir/app/app-bawagpsk-uat.apk"
+    outPath = "$project.projectDir/app/"
 
     doLast {
         println(downloadURL)  // if you don't access downloadUrl in doLast it won't be set yet
